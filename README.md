@@ -1,16 +1,63 @@
-# Jarvis
+<div align="center">
 
-**Your WhatsApp group's AI build agent.** Tag `@jarvis` in any chat, attach a screenshot,
-and a real Claude Code (or Codex) session ships code in your repo — streaming progress
-back to the chat like a teammate who never sleeps.
+<img src="assets/banner.svg" alt="Jarvis — WhatsApp relay for Claude Code and Codex" width="100%"/>
 
+### Your WhatsApp group's AI build agent
+
+**Tag `@jarvis` in any chat. Attach a screenshot. Watch a real Claude Code or Codex
+session ship code in your repo — streaming progress back like a teammate who never sleeps.**
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-25d366?style=flat-square)](LICENSE)
+[![Node](https://img.shields.io/badge/node-%E2%89%A520-38bdf8?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org)
+[![Backend: Claude Code](https://img.shields.io/badge/backend-Claude%20Code-d97757?style=flat-square)](https://claude.com/claude-code)
+[![Backend: Codex](https://img.shields.io/badge/backend-Codex-9ca3af?style=flat-square&logo=openai&logoColor=white)](https://github.com/openai/codex)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-8b5cf6?style=flat-square)](CONTRIBUTING.md)
+
+</div>
+
+---
+
+## Demo
+
+```text
+You:        🤖 jarvis · setting up…
+Terminal:
+
+     ██╗ █████╗ ██████╗ ██╗   ██╗██╗███████╗
+     ██║██╔══██╗██╔══██╗██║   ██║██║██╔════╝
+     ██║███████║██████╔╝██║   ██║██║███████╗
+██   ██║██╔══██║██╔══██╗╚██╗ ██╔╝██║╚════██║
+╚█████╔╝██║  ██║██║  ██║ ╚████╔╝ ██║███████║
+ ╚════╝ ╚═╝  ╚═╝╚═╝  ╚═╝  ╚═══╝  ╚═╝╚══════╝
+  WhatsApp ⇄ Claude Code / Codex relay
+
+  ✔ Claude Code: installed + authenticated
+  ◆  Which coding agent should power it? … Claude Code
+  ◆  Project directory … ~/Projects/my-app
+  ◆  Approval level … approve-edits
+  ✔ WhatsApp linked! Session saved.
 ```
-WhatsApp group ──> jarvis (local Node.js) ──> Claude Code SDK / Codex CLI ──> your repo
-      ^                        |                               |
-      └── 🤖 progress + results ┴── session memory (resume) ────┘
+
+```text
+Teammate:  @jarvis the onboarding screen looks broken, see screenshot 📷
+You:       🤖 Looking at the screenshot — the form overflows on mobile…
+You:       🤖 Fixing the layout, running the component tests…
+You:       🤖 ✅ Fixed. Added responsive breakpoint + regression test. 14/14 pass.
 ```
 
-## Quickstart
+## ✨ Why Jarvis
+
+| | |
+|---|---|
+| 🧠 **Real agents, not chatbots** | Drives actual Claude Code / Codex sessions that edit files, run tests, and verify their work |
+| 🧵 **Persistent memory** | Every chat keeps one resumable session — the agent remembers the whole conversation |
+| 📷 **Screenshots in** | Attach images with a message; they land in the agent's context automatically |
+| 👥 **Group-native** | Anyone in the group can tag it; per-chat agent binding, whitelists, approval levels |
+| 🔀 **Two engines, one config** | Claude Code ↔ Codex is a one-line switch — same interface, swappable backends |
+| 🖥️ **Beautiful CLI** | Interactive setup wizard, preflight `doctor`, agent profile manager |
+| 🪶 **Browserless** | Pure Node + WebSocket (Baileys). No Puppeteer, no Chromium, runs on a $5 VPS |
+
+## 🚀 Quickstart
 
 ```bash
 npx jarvis-relay
@@ -19,26 +66,29 @@ npx jarvis-relay
 or from a clone:
 
 ```bash
-git clone https://github.com/YOU/jarvis && cd jarvis
+git clone https://github.com/rkd0608/jarvis-relay && cd jarvis-relay
 npm install
 npm run setup
 ```
 
-The setup wizard:
+The wizard handles everything:
 
-1. Verifies Node 20+ and your coding-agent CLIs
-2. Detects whether **Claude Code** / **Codex** are installed and logged in, and walks
-   you through either (subscription or API key — Jarvis just rides the CLI's auth)
-3. Records your agent preferences: backend, repo, approval level, persona, turn budget
-4. Links WhatsApp by QR (scan once — the session persists)
-5. Starts the bot
+1. ✔ Verifies Node 20+ and your coding-agent CLIs
+2. ✔ Detects Claude Code / Codex installs + logins — walks you through either
+   (rides the CLI's own auth: subscription or API key)
+3. ◆ Records your agent preferences — backend, repo, approval level, persona, turn budget
+4. ◆ Links WhatsApp by QR (scan once, session persists)
+5. ✔ Starts the bot
 
-## Usage
+Then add the bot's contact to a WhatsApp group, send `@jarvis id`, paste the id into
+`jarvis.config.json → groups`, restart. Done.
+
+## 💬 Usage
 
 | Message | Effect |
 |---|---|
 | `@jarvis fix the login bug` | Sends work to the chat's agent |
-| `@jarvis <request>` + screenshot | Image lands in `inbox/`, agent sees it |
+| `@jarvis <request>` + 📷 | Screenshot lands in `inbox/`, agent sees it |
 | `!jarvis <request>` | Prefix trigger (same as mention) |
 | `@jarvis status` | Active agent, backend, current session |
 | `@jarvis id` | This chat's id — paste into `groups` in config |
@@ -47,15 +97,15 @@ The setup wizard:
 | `@jarvis use <session-id>` | Attach to a specific past session |
 | `@jarvis sessions` | List recent sessions for the project |
 
-### Sessions
+### 🧵 Sessions
 
 The first request creates a new agent session; every later message **resumes the same
-session**, so the agent remembers the whole conversation. Session ids live in
+session** — the agent remembers the entire conversation. Session ids live in
 `jarvis.state.json`. To continue a session you ran manually in your terminal, grab the
 UUID (`~/.claude/projects/<slugified-repo>/` for Claude, `~/.codex/sessions/` for Codex)
-and `@jarvis use <uuid>`.
+and send `@jarvis use <uuid>`.
 
-## CLI
+## 🖥️ CLI
 
 ```
 jarvis              start the bot (auto-runs setup if unconfigured)
@@ -66,7 +116,8 @@ jarvis agent add    add an agent profile
 jarvis agent remove remove an agent profile
 ```
 
-## Configuration
+<details>
+<summary><b>⚙️ Configuration reference</b></summary>
 
 `jarvis.config.json` (created by the wizard, see
 [`jarvis.config.example.json`](jarvis.config.example.json)):
@@ -94,7 +145,10 @@ Approval mapping:
 Top-level: `openGroups` (answer in any group it's added to), `selfTrigger`
 (`Jarvis, …` from the bot account itself), `inboxDir`.
 
-## Running 24/7
+</details>
+
+<details>
+<summary><b>🔋 Running 24/7</b></summary>
 
 ```bash
 npm i -g pm2
@@ -103,22 +157,14 @@ pm2 startup   # follow the printed sudo instruction — auto-start on boot
 ```
 
 The bot is a plain Node + WebSocket client (no browser), so it also runs happily on a
-$5 VPS — copy the folder, `npm i && npm run setup`, scan once.
+cheap VPS — copy the folder, `npm i && npm run setup`, scan once. Your phone only needs
+to come online once every 14 days to keep the linked device alive.
 
-## Security
+</details>
 
-- Triggering Jarvis means running an agent with shell access on your machine. Keep
-  `allowedUsers` strict in groups you don't fully trust.
-- `full-auto` approval hands the agent unrestricted shell. Prefer `approve-edits`.
-- Group members must be registered: unknown chats are answered with their chat id and
-  ignored until you add it to `groups`.
-- Baileys is an unofficial WhatsApp client: fine for personal use, but automated
-  activity on a personal number carries a small (rare) ban risk. A dedicated number
-  removes the concern entirely.
+## 🏗️ How it works
 
-## How it works
-
-```
+```text
 src/
 ├── index.js            runBot() entry point
 ├── whatsapp.js         Baileys adapter (QR link, message normalization, media)
@@ -138,22 +184,35 @@ src/
 
 Adding another engine = one file exporting
 `run(agent, prompt, images, onProgress) → { summary, sessionId }` plus a line in
-`backends/index.js`. PRs welcome.
+`backends/index.js`.
 
-## Troubleshooting
+> [!WARNING]
+> **Security** — triggering Jarvis means running an agent with shell access on your
+> machine. Keep `allowedUsers` strict in groups you don't fully trust, prefer
+> `approve-edits` over `full-auto`, and remember that unknown chats are ignored until
+> you register their id. Baileys is an unofficial WhatsApp client: fine for personal
+> use, with a small (rare) ban risk on a personal number.
+
+<details>
+<summary><b>🩺 Troubleshooting</b></summary>
 
 - **No reply at all** → `jarvis doctor`; check the chat id is registered (`@jarvis id`)
 - **"Not logged in"** → run `claude` / `codex login` in a terminal, then re-test
+- **"Usage limit reached"** → your plan's limit; wait for the reset shown in the error
 - **WhatsApp disconnected** → the bot auto-reconnects; if logged out, delete
   `session-baileys/` and re-scan
 - **Bot sends but never reacts** → ensure the phone came online in the last 14 days
   (WhatsApp logs out linked devices after two weeks of silence)
 
-## Contributing
+</details>
+
+## 🤝 Contributing
 
 PRs welcome — new backends, better group permission flows, media types, tests. Keep
 PRs focused; open an issue first for bigger changes.
 
-## License
+<div align="center">
 
-[MIT](LICENSE)
+**[MIT License](LICENSE)** · Built with [Claude Code](https://claude.com/claude-code)
+
+</div>
