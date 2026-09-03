@@ -1,0 +1,33 @@
+name: Publish to npm
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # OIDC — npm trusted publishing, no tokens needed
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: "https://registry.npmjs.org/"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Verify package
+        run: |
+          for f in bin/jarvis.js src/*.js src/cli/*.js src/backends/*.js; do
+            node --check "$f"
+          done
+          npm pack --dry-run
+
+      - name: Publish
+        run: npm publish --provenance
