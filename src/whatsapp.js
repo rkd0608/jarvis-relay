@@ -133,7 +133,11 @@ function startWhatsApp(config, onMessage) {
 
     const msg = {
       isStatus: false,
-      from: jid,
+      transport: "whatsapp",
+      from: `wa:${jid}`,
+      registerId: jid,
+      isGroup,
+      isDM: !isGroup,
       body: body ?? "",
       fromMe,
       author,

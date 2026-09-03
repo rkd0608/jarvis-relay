@@ -10,7 +10,20 @@ export async function loadState() {
   } catch {
     state = {};
   }
+  migrateState();
   return state;
+}
+
+// v1.0 stored raw WhatsApp ids; v1.1 prefixes by transport (wa:, slk:)
+function migrateState() {
+  for (const key of Object.keys(state)) {
+    if (key === "_meta") continue;
+    if (/(^wa:|^slk:)/.test(key)) continue;
+    if (/(@g\.us|@c\.us|@lid)$/.test(key)) {
+      state[`wa:${key}`] = state[key];
+      delete state[key];
+    }
+  }
 }
 
 export function getState() {

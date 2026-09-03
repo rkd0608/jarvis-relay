@@ -6,6 +6,8 @@ const DEFAULTS = {
   inboxDir: "inbox",
   openGroups: false,
   selfTrigger: true,
+  whatsapp: true,
+  slack: null,
   agents: {},
 };
 
@@ -15,7 +17,7 @@ const BACKENDS = ["claude-code", "codex"];
 export async function loadConfig(file = "jarvis.config.json") {
   let raw;
   try {
-    raw = JSON.parse(await fs.readFile(file, "utf8"));
+    raw = JSON.parse(await fs.promises.readFile(file, "utf8"));
   } catch (err) {
     throw new Error(`Cannot read ${file}: ${err.message}`);
   }
@@ -23,11 +25,24 @@ export async function loadConfig(file = "jarvis.config.json") {
   const config = { ...DEFAULTS, ...raw };
   config.inboxDir = path.resolve(config.inboxDir);
 
-  if (!config.botNumber || !config.botNumber.endsWith("@c.us")) {
+  if (config.botNumber && !config.botNumber.endsWith("@c.us")) {
     throw new Error(
       'botNumber must be the bot WhatsApp id in full format, e.g. "15551234567@c.us"'
     );
   }
+
+  const hasWhatsapp = !!config.botNumber && config.whatsapp !== false;
+  const hasSlack = !!(
+    config.slack?.botToken &&
+    config.slack?.appToken &&
+    config.slack?.botUserId
+  );
+  if (!hasWhatsapp && !hasSlack) {
+    throw new Error(
+      "No transport configured — set botNumber (WhatsApp) and/or slack tokens"
+    );
+  }
+
   const agentNames = Object.keys(config.agents);
   if (!agentNames.length) {
     throw new Error("Define at least one agent in jarvis.config.json");
@@ -47,7 +62,7 @@ export async function loadConfig(file = "jarvis.config.json") {
         `agent "${name}": approval must be one of ${APPROVALS.join(", ")}`
       );
     }
-    const stat = await fs.stat(a.projectDir).catch(() => null);
+    const stat = await fs.promises.stat(a.projectDir).catch(() => null);
     if (!stat || !stat.isDirectory()) {
       throw new Error(
         `agent "${name}": projectDir does not exist: ${a.projectDir}`
@@ -55,6 +70,6 @@ export async function loadConfig(file = "jarvis.config.json") {
     }
   }
 
-  await fs.mkdir(config.inboxDir, { recursive: true });
+  await fs.promises.mkdir(config.inboxDir, { recursive: true });
   return config;
 }

@@ -19,17 +19,19 @@ export function makeRouter(config) {
     for (const part of parts) await chat.sendMessage(part);
   }
 
-  function resolveAgent(chatId, senderId) {
+  function resolveAgent(chatId, registerId, senderId, isDM) {
     const state = getState();
     const entry = state[chatId] ?? {};
 
     let name = entry.agent;
     if (!name) {
       name = Object.keys(config.agents).find((k) =>
-        config.agents[k].groups?.includes(chatId)
+        (config.agents[k].groups ?? []).some(
+          (g) => g === registerId || g === chatId
+        )
       );
     }
-    if (!name && (config.openGroups || !chatId.endsWith("@g.us"))) {
+    if (!name && (config.openGroups || isDM)) {
       name = Object.keys(config.agents)[0]; // default = first profile
     }
     if (!name) return null;
@@ -106,50 +108,50 @@ export function makeRouter(config) {
   async function onMessage(msg) {
     try {
       if (msg.isStatus) return;
-      const chatId = msg.from;
-      if (chatId === "status@broadcast") return;
-      const isChat =
-        chatId.endsWith("@g.us") ||
-        chatId.endsWith("@c.us") ||
-        chatId.endsWith("@lid");
-      if (!isChat) return;
+
+      const chatId = msg.from; // transport-prefixed: wa:… / slk:…
+      const registerId = msg.registerId ?? chatId.replace(/^\w+:/, "");
+
+      console.log(
+        `[msg] ${msg.transport} chat=${chatId} author=${msg.author ?? "-"} ` +
+          `fromMe=${!!msg.fromMe} ` +
+          `mentions=${JSON.stringify(msg.mentionedIds ?? [])} ` +
+          `body=${JSON.stringify((msg.body ?? "").slice(0, 80))}`
+      );
 
       // learn the bot account's lid (WhatsApp migrated mentions to lid ids)
       const ownLid = getState()._meta?.ownLid ?? null;
       if (
         msg.fromMe &&
-        chatId.endsWith("@g.us") &&
+        msg.transport === "whatsapp" &&
+        msg.isGroup &&
         msg.author?.endsWith("@lid") &&
         ownLid !== msg.author
       ) {
         await setMeta({ ownLid: msg.author });
       }
 
-      console.log(
-        `[msg] chat=${chatId} author=${msg.author ?? "-"} fromMe=${!!msg.fromMe} ` +
-          `mentions=${JSON.stringify(msg.mentionedIds ?? [])} ` +
-          `body=${JSON.stringify((msg.body ?? "").slice(0, 80))}`
-      );
-
       if (!isTriggered(msg, config, getState()._meta?.ownLid ?? null)) return;
 
-      const sender = msg.fromMe ? config.botNumber : (msg.author ?? msg.from);
-      const agent = resolveAgent(chatId, sender);
+      const sender = msg.fromMe
+        ? config.botNumber || config.slack?.botUserId
+        : (msg.author ?? msg.from);
+      const agent = resolveAgent(chatId, registerId, sender, msg.isDM);
 
       if (!agent) {
         await msg.reply(
-          `Unregistered chat \`${chatId}\`.\n` +
+          `🤖 Unregistered chat \`${registerId}\`.\n` +
             "Add this id to an agent's `groups` in jarvis.config.json " +
             "(or set openGroups: true), then restart."
         );
         return;
       }
-      if (!isUserAllowed(agent, sender, config.botNumber)) return;
+      if (!isUserAllowed(agent, sender, config)) return;
 
       const chat = await msg.getChat();
-      const text = stripTrigger(msg, config.botNumber);
+      const text = stripTrigger(msg, config);
       if (!text) {
-        await send(chat, helpText(agent, chatId));
+        await send(chat, helpText(agent, registerId));
         return;
       }
 
@@ -158,6 +160,7 @@ export function makeRouter(config) {
         await handleCommand({
           chat,
           chatId,
+          registerId,
           agent,
           config,
           command: cmd.name,
@@ -178,7 +181,7 @@ export function makeRouter(config) {
       }
 
       enqueue(async () => {
-        const live = resolveAgent(chatId, sender); // fresh state at run time
+        const live = resolveAgent(chatId, registerId, sender, msg.isDM); // fresh state at run time
         const progress = makeProgressSender(chat);
         try {
           await chat.sendStateTyping();

@@ -197,8 +197,7 @@ export async function runSetup() {
     if (p.isCancel(addMore)) p.cancel("Setup cancelled.");
   }
 
-  // 4. Write config
-  const configPath = path.resolve("jarvis.config.json");
+  // 4. Slack (optional)
   const config = {
     botNumber: "", // filled after WhatsApp link
     inboxDir: "inbox",
@@ -206,37 +205,50 @@ export async function runSetup() {
     selfTrigger: true,
     agents,
   };
-  const fs = await import("node:fs");
+  const wantSlack = await p.confirm({
+    message: "Also connect a Slack workspace?",
+    initialValue: false,
+  });
+  if (p.isCancel(wantSlack)) p.cancel("Setup cancelled.");
+  if (wantSlack) {
+    const { runSlackLink } = await import("./slack-link.js");
+    await runSlackLink(config, { save: false });
+  }
+
+  // 5. Write config
+  const configPath = path.resolve("jarvis.config.json");
   fs.writeFileSync(configPath, JSON.stringify(config, null, 2) + "\n");
   await fs.promises.mkdir(path.resolve(config.inboxDir), { recursive: true });
   p.log.success(`Config written to ${configPath}`);
 
-  // 5. Link WhatsApp (QR inline)
-  p.log.step("Linking WhatsApp — scan the QR below with the phone that owns this bot");
-  const linkClient = startWhatsApp(config, () => {});
-  const timeout = new Promise((_, rej) =>
-    setTimeout(() => rej(new Error("timeout")), 180_000)
-  );
-  try {
-    await Promise.race([linkClient.whenReady, timeout]);
-    p.log.success("WhatsApp linked! Session saved — you won't need to scan again.");
-    const botNumber = `${(linkClient.user?.id ?? "").split(":")[0]}@c.us`;
-    if (botNumber.startsWith("@")) throw new Error("could not read number");
-    config.botNumber = botNumber;
-    fs.writeFileSync(configPath, JSON.stringify(config, null, 2) + "\n");
-  } catch (err) {
+  // 6. Link WhatsApp (QR inline) — skipped if Slack-only
+  if (!config.slack) {
+    p.log.step("Linking WhatsApp — scan the QR below with the phone that owns this bot");
+    const linkClient = startWhatsApp(config, () => {});
+    const timeout = new Promise((_, rej) =>
+      setTimeout(() => rej(new Error("timeout")), 180_000)
+    );
+    try {
+      await Promise.race([linkClient.whenReady, timeout]);
+      p.log.success("WhatsApp linked! Session saved — you won't need to scan again.");
+      const botNumber = `${(linkClient.user?.id ?? "").split(":")[0]}@c.us`;
+      if (botNumber.startsWith("@")) throw new Error("could not read number");
+      config.botNumber = botNumber;
+      fs.writeFileSync(configPath, JSON.stringify(config, null, 2) + "\n");
+    } catch (err) {
+      await linkClient.destroy();
+      p.log.error(err.message === "timeout" ? "QR scan timed out." : err.message);
+      p.outro("Re-run `jarvis` to retry linking.");
+      process.exit(1);
+    }
     await linkClient.destroy();
-    p.log.error(err.message === "timeout" ? "QR scan timed out." : err.message);
-    p.outro("Re-run `jarvis` to retry linking.");
-    process.exit(1);
   }
-  await linkClient.destroy();
 
   p.note(
     [
       `Agents: ${Object.keys(agents).join(", ")}`,
-      `Trigger: type ${pc.cyan("@jarvis <request>")} in a WhatsApp chat`,
-      `Groups: send any ${pc.cyan("@jarvis id")} in a group, then paste the id into`,
+      `Trigger: type ${pc.cyan("@jarvis <request>")} in a connected chat`,
+      `Groups/channels: send ${pc.cyan("@jarvis id")} there, then paste the id into`,
       `        jarvis.config.json → agents.<name>.groups and restart.`,
     ].join("\n"),
     "You're all set"

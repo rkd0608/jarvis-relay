@@ -31,6 +31,29 @@ export async function runDoctor() {
     )
   );
 
+  p.log.info(pc.bold("Slack"));
+  try {
+    const { loadConfig } = await import("../config.js");
+    const cfg = await loadConfig();
+    if (cfg.slack?.botToken) {
+      const s2 = p.spinner();
+      s2.start("Validating Slack bot token…");
+      try {
+        const { WebClient } = await import("@slack/web-api");
+        const auth = await new WebClient(cfg.slack.botToken).auth.test();
+        s2.stop(`Validated — bot user ${auth.user_id} in workspace ${auth.team}`);
+        console.log(kv("slack", "linked + token valid", true));
+      } catch (err) {
+        s2.stop(`token invalid: ${err.message}`);
+        console.log(kv("slack", "configured but token invalid", false));
+      }
+    } else {
+      console.log(kv("slack", "not configured (optional — `jarvis slack`)", true));
+    }
+  } catch {
+    console.log(kv("slack", "skipped (config invalid)", false));
+  }
+
   p.log.info(pc.bold("Config"));
   try {
     const { loadConfig } = await import("../config.js");

@@ -16,6 +16,7 @@ Usage
   jarvis setup           interactive onboarding wizard
   jarvis start           start the bot
   jarvis doctor          preflight: node, backends, auth, whatsapp session
+  jarvis slack           link a Slack workspace (creates app via manifest)
   jarvis agent list      show agent profiles
   jarvis agent add       add an agent profile
   jarvis agent remove    remove an agent profile
@@ -48,6 +49,21 @@ async function main() {
   if (cmd === "agent") {
     const { runAgentCmd } = await import("../src/cli/agent-cmd.js");
     await runAgentCmd(args[0], args.slice(1));
+    return;
+  }
+
+  if (cmd === "slack") {
+    const { runSlackLink } = await import("../src/cli/slack-link.js");
+    const { loadConfig } = await import("../src/config.js");
+    let config;
+    try {
+      config = await loadConfig();
+    } catch (err) {
+      // linking Slack on a fresh install — build a minimal config
+      config = JSON.parse(fs.readFileSync(path.join(root, "jarvis.config.example.json"), "utf8"));
+      config.agents = {};
+    }
+    await runSlackLink(config);
     return;
   }
 

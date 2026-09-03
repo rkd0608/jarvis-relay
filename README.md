@@ -55,7 +55,8 @@ You:       🤖 ✅ Fixed. Added responsive breakpoint + regression test. 14/14 
 | 👥 **Group-native** | Anyone in the group can tag it; per-chat agent binding, whitelists, approval levels |
 | 🔀 **Two engines, one config** | Claude Code ↔ Codex is a one-line switch — same interface, swappable backends |
 | 🖥️ **Beautiful CLI** | Interactive setup wizard, preflight `doctor`, agent profile manager |
-| 🪶 **Browserless** | Pure Node + WebSocket (Baileys). No Puppeteer, no Chromium, runs on a $5 VPS |
+| 🪶 **Browserless** | Pure Node + WebSocket. No Puppeteer, no Chromium, runs on a $5 VPS |
+| 💬 **Two transports** | WhatsApp (Baileys) and Slack (official Socket Mode API) — same agents, same commands |
 
 ## 🚀 Quickstart
 
@@ -82,6 +83,24 @@ The wizard handles everything:
 
 Then add the bot's contact to a WhatsApp group, send `@jarvis id`, paste the id into
 `jarvis.config.json → groups`, restart. Done.
+
+### 💬 Connecting Slack (optional)
+
+```bash
+jarvis slack
+```
+
+The wizard saves a ready-made app manifest (`slack-app-manifest.yml`), then asks for two
+tokens from [api.slack.com/apps](https://api.slack.com/apps):
+
+1. **Create New App → From an app manifest** → paste the manifest → create
+2. **Install to Workspace** → copy the Bot Token (`xoxb-…`)
+3. **Socket Mode** → create an app-level token (`xapp-…`)
+4. Paste both into the wizard — it validates them live
+5. `/invite @jarvis` in a channel, send `@jarvis id`, register the id like above
+
+Each Slack **thread** gets its own resumable agent session — parallel conversations in
+one channel.
 
 ## 💬 Usage
 
@@ -142,8 +161,9 @@ Approval mapping:
 | `approve-edits` | acceptEdits | `--full-auto` |
 | `full-auto` | bypassPermissions ⚠️ | bypass approvals+sandbox ⚠️ |
 
-Top-level: `openGroups` (answer in any group it's added to), `selfTrigger`
-(`Jarvis, …` from the bot account itself), `inboxDir`.
+| `openGroups` (answer in any group it's added to), `selfTrigger`
+(`Jarvis, …` from the bot account itself), `inboxDir`, and a `slack` block
+(`botToken`, `appToken`, `botUserId` — created by `jarvis slack`).
 
 </details>
 

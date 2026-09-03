@@ -1,9 +1,8 @@
 import path from "node:path";
-import fs from "node:fs/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { loadConfig } from "./config.js";
 import { loadState } from "./state.js";
-import { startWhatsApp } from "./whatsapp.js";
+import { startTransports } from "./transport.js";
 import { makeRouter } from "./router.js";
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -13,7 +12,7 @@ export async function runBot(config) {
   await loadState();
   console.log("Jarvis starting…");
 
-  const client = startWhatsApp(config, makeRouter(config));
+  const client = startTransports(config, makeRouter(config));
 
   const shutdown = () => {
     console.log("\nShutting down…");

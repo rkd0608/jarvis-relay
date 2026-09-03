@@ -96,7 +96,7 @@ async function listSessions(agent) {
   return out.sort((a, b) => b.mtime - a.mtime).slice(0, 8);
 }
 
-export async function handleCommand({ chat, chatId, agent, config, command, args }) {
+export async function handleCommand({ chat, chatId, registerId, agent, config, command, args }) {
   const send = async (text) => {
     for (const part of String(text).match(/[\s\S]{1,3500}/g) ?? []) {
       await chat.sendMessage(part);
@@ -109,7 +109,7 @@ export async function handleCommand({ chat, chatId, agent, config, command, args
       break;
 
     case "id":
-      await send(`Chat id: \`${chatId}\``);
+      await send(`Chat id: \`${registerId ?? chatId}\` — paste this into an agent's \`groups\` in jarvis.config.json`);
       break;
 
     case "status": {
