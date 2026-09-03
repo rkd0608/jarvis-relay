@@ -31,5 +31,12 @@
     "jarvis.config.example.json",
     "README.md",
     "LICENSE"
-  ]
+  ],
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.1.0",
+    "@clack/prompts": "^0.11.0",
+    "@whiskeysockets/baileys": "^6.7.0",
+    "picocolors": "^1.1.0",
+    "qrcode-terminal": "^0.12.0"
+  }
 }
