@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const userCwd = process.cwd(); // where the user invoked jarvis (before chdir)
 process.chdir(root); // config/state/session resolve from the project dir
 
 const [cmd, ...args] = process.argv.slice(2);
@@ -72,7 +73,7 @@ async function main() {
   const { runSetup } = await import("../src/cli/setup.js");
 
   if (cmd === "setup" || (!(await configExists()) && !cmd)) {
-    const config = await runSetup();
+    const config = await runSetup({ defaultDir: userCwd });
     await runBot(config);
     return;
   }

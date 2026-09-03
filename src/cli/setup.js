@@ -154,7 +154,7 @@ export async function askProfile(existingNames = [], defaultDir = process.cwd())
   return { name: (name || "jarvis").trim(), profile };
 }
 
-export async function runSetup() {
+export async function runSetup({ defaultDir = process.cwd() } = {}) {
   p.intro(header());
 
   // 1. Node
@@ -186,7 +186,7 @@ export async function runSetup() {
   const agents = {};
   let addMore = true;
   while (addMore) {
-    const { name, profile } = await askProfile(Object.keys(agents));
+    const { name, profile } = await askProfile(Object.keys(agents), defaultDir);
     if (!claudeOk && profile.backend === "claude-code") profile.backend = "codex";
     if (!codexOk && profile.backend === "codex") profile.backend = "claude-code";
     agents[name] = profile;
