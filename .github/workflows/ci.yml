@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Syntax check all sources
+        run: |
+          for f in bin/jarvis.js src/*.js src/cli/*.js src/backends/*.js; do
+            node --check "$f"
+          done
+
+      - name: Smoke import all modules
+        run: |
+          node --input-type=module -e "
+            await import('./src/config.js');
+            await import('./src/state.js');
+            await import('./src/queue.js');
+            await import('./src/auth.js');
+            await import('./src/commands.js');
+            await import('./src/router.js');
+            await import('./src/whatsapp.js');
+            await import('./src/backends/index.js');
+            console.log('all modules import cleanly');
+          "
+
+      - name: CLI surface (help + version)
+        run: |
+          node bin/jarvis.js --help > /dev/null
+          node bin/jarvis.js --version
+
+      - name: Verify publishable file set
+        run: npm pack --dry-run
