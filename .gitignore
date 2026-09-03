@@ -1,0 +1,10 @@
+node_modules/
+session/
+session-baileys/
+inbox/
+jarvis.config.json
+jarvis.state.json
+jarvis.pid
+*.log
+.DS_Store
+.wwebjs_cache/

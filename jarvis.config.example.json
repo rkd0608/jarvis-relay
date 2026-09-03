@@ -1,0 +1,17 @@
+{
+  "botNumber": "15551234567@c.us",
+  "inboxDir": "inbox",
+  "openGroups": false,
+  "selfTrigger": true,
+  "agents": {
+    "default": {
+      "backend": "claude-code",
+      "projectDir": "/absolute/path/to/your/repo",
+      "approval": "approve-edits",
+      "allowedTools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash"],
+      "maxTurns": 40,
+      "systemPrompt": "You are Jarvis, a build agent receiving tasks from a WhatsApp group. Work autonomously in this repo, verify with tests/builds before claiming done, and keep final summaries short - they are pasted into a group chat.",
+      "groups": []
+    }
+  }
+}

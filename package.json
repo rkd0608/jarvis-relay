@@ -1,0 +1,35 @@
+{
+  "name": "jarvis-relay",
+  "version": "1.0.0",
+  "description": "WhatsApp relay bot that drives Claude Code / Codex sessions in your repos. Tag it in a group chat, attach screenshots, and it ships code.",
+  "license": "MIT",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "jarvis": "bin/jarvis.js"
+  },
+  "scripts": {
+    "setup": "node bin/jarvis.js setup",
+    "start": "node src/index.js",
+    "doctor": "node bin/jarvis.js doctor"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "whatsapp",
+    "claude-code",
+    "codex",
+    "ai-agent",
+    "bot",
+    "relay",
+    "cli"
+  ],
+  "files": [
+    "bin/",
+    "src/",
+    "jarvis.config.example.json",
+    "README.md",
+    "LICENSE"
+  ]
+}
