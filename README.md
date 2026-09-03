@@ -213,6 +213,6 @@ PRs focused; open an issue first for bigger changes.
 
 <div align="center">
 
-**[MIT License](LICENSE)** · Built with [Claude Code](https://claude.com/claude-code)
+**[MIT License](LICENSE)**
 
 </div>
