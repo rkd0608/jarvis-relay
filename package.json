@@ -1,6 +1,6 @@
 {
   "name": "jarvis-relay",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "WhatsApp relay bot that drives Claude Code / Codex sessions in your repos. Tag it in a group chat, attach screenshots, and it ships code.",
   "license": "MIT",
   "type": "module",
