@@ -7,6 +7,7 @@
 **Tag `@jarvis` in any chat. Attach a screenshot. Watch a real Claude Code or Codex
 session ship code in your repo — streaming progress back like a teammate who never sleeps.**
 
+[![npm](https://img.shields.io/npm/v/jarvis-relay?style=flat-square&color=cb3837&logo=npm&logoColor=white)](https://www.npmjs.com/package/jarvis-relay)
 [![License: MIT](https://img.shields.io/badge/License-MIT-25d366?style=flat-square)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%E2%89%A520-38bdf8?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org)
 [![Backend: Claude Code](https://img.shields.io/badge/backend-Claude%20Code-d97757?style=flat-square)](https://claude.com/claude-code)
@@ -61,7 +62,10 @@ You:       🤖 ✅ Fixed. Added responsive breakpoint + regression test. 14/14 
 ## 🚀 Quickstart
 
 ```bash
-npx jarvis-relay
+npx jarvis-relay          # one-off
+# or
+npm i -g jarvis-relay     # installs the `jarvis` command
+jarvis                    # starts setup on first run
 ```
 
 or from a clone:
@@ -129,7 +133,8 @@ and send `@jarvis use <uuid>`.
 ```
 jarvis              start the bot (auto-runs setup if unconfigured)
 jarvis setup        interactive onboarding wizard
-jarvis doctor       preflight: node, backends, auth, whatsapp session
+jarvis doctor       preflight: node, backends, auth, whatsapp + slack
+jarvis slack        link a Slack workspace (app manifest + tokens)
 jarvis agent list   show agent profiles
 jarvis agent add    add an agent profile
 jarvis agent remove remove an agent profile
